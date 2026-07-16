@@ -3,6 +3,7 @@ import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SEARCH_TYPES } from '@/config/search'
 import { toSearchRouteQuery } from '@/services/searchService'
+import Logo from '@/assets/logo.png'
 
 const route = useRoute()
 const router = useRouter()
@@ -60,7 +61,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
 <template>
   <header class="site-header">
     <div class="header-bar container">
-      <RouterLink class="brand" to="/" aria-label="LocalHub 홈">LocalHub</RouterLink>
+      <RouterLink class="brand" to="/" aria-label="호남두 홈">
+        <img :src="Logo" alt="호남두" class="brand-logo" />
+      </RouterLink>
 
       <nav class="main-nav" aria-label="주요 메뉴">
         <RouterLink
@@ -120,3 +123,26 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
     </Transition>
   </header>
 </template>
+
+<style scoped>
+.brand {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.brand-logo {
+  display: block;
+  width: clamp(7.5rem, 12vw, 10rem);
+  height: 3rem;
+  object-fit: contain;
+  object-position: left center;
+}
+
+@media (max-width: 640px) {
+  .brand-logo {
+    width: 6.5rem;
+    height: 2.5rem;
+  }
+}
+</style>

@@ -94,3 +94,20 @@ onMounted(() => { applyQuery(); loadPosts() })
     </nav>
   </div>
 </template>
+
+<style scoped>
+@media (max-width: 640px) {
+  .pagination {
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .pagination button {
+    min-width: 2rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+}
+</style>
