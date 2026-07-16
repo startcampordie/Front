@@ -48,7 +48,13 @@ function updateRoute(page = 1) {
 }
 
 function formatDate(date) {
-  return date.startsWith(String(new Date().getFullYear())) ? date.slice(5).replace('-', '.') : date.replaceAll('-', '.')
+  if (!date) return '-'
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return date
+  const year = parsed.getFullYear()
+  const month = String(parsed.getMonth() + 1).padStart(2, '0')
+  const day = String(parsed.getDate()).padStart(2, '0')
+  return year === new Date().getFullYear() ? `${month}.${day}` : `${year}.${month}.${day}`
 }
 
 watch(() => route.query, () => { applyQuery(); loadPosts() }, { deep: true })
@@ -60,7 +66,7 @@ onMounted(() => { applyQuery(); loadPosts() })
   <div class="container page-section">
     <p class="breadcrumb">홈 &gt; 게시판</p>
     <h1>게시판</h1>
-    <p class="page-description">광주 지역의 다양한 정보와 소식을 자유롭게 공유해 보세요.</p>
+    <p class="page-description">전북·전남 지역의 다양한 정보와 소식을 자유롭게 공유해 보세요.</p>
 
     <form class="board-tools" role="search" @submit.prevent="updateRoute(1)">
       <select v-model="filters.searchType" aria-label="검색 범위"><option value="title-content">제목 + 내용</option><option value="title">제목</option><option value="content">내용</option></select>
@@ -94,20 +100,3 @@ onMounted(() => { applyQuery(); loadPosts() })
     </nav>
   </div>
 </template>
-
-<style scoped>
-@media (max-width: 640px) {
-  .pagination {
-    gap: 0.25rem;
-    flex-wrap: wrap;
-  }
-
-  .pagination button {
-    min-width: 2rem;
-    padding: 0.4rem 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1;
-    white-space: nowrap;
-  }
-}
-</style>

@@ -64,11 +64,11 @@ const floatingState = computed(() => {
   return 'default'
 })
 const floatingLabel = computed(() => {
-  if (sending.value) return 'LocalHub 챗봇, 답변 생성 중'
-  if (isHistoryLoading.value) return 'LocalHub 챗봇, 이전 대화 불러오는 중'
-  if (floatingState.value === 'error') return 'LocalHub 챗봇 열기, 오류 확인 필요'
-  if (floatingState.value === 'unread') return 'LocalHub 챗봇 열기, 새 답변 1개'
-  return 'LocalHub 챗봇 열기'
+  if (sending.value) return '호남두 챗봇, 답변 생성 중'
+  if (isHistoryLoading.value) return '호남두 챗봇, 이전 대화 불러오는 중'
+  if (floatingState.value === 'error') return '호남두 챗봇 열기, 오류 확인 필요'
+  if (floatingState.value === 'unread') return '호남두 챗봇 열기, 새 답변 1개'
+  return '호남두 챗봇 열기'
 })
 
 let mobileMediaQuery = null
@@ -419,19 +419,19 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <aside class="chatbot" aria-label="LocalHub 챗봇">
+  <aside class="chatbot" aria-label="호남두 챗봇">
     <section
       v-if="isOpen"
       ref="windowElement"
       class="chatbot-window"
-      aria-label="LocalHub 챗봇 대화창"
+      aria-label="호남두 챗봇 대화창"
       tabindex="-1"
     >
       <header class="chatbot-header">
         <div class="chatbot-heading">
           <span class="chatbot-status-dot" aria-hidden="true"></span>
           <div>
-            <strong>LocalHub 챗봇</strong>
+            <strong>호남두 챗봇</strong>
             <span>지역 정보 안내</span>
           </div>
         </div>

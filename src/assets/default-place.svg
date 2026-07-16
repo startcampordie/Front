@@ -1,9 +1,9 @@
 <svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="640" height="360" rx="24" fill="#EDF4FF"/>
-  <circle cx="500" cy="92" r="38" fill="#BFD7FF"/>
-  <path d="M70 288L204 142L302 240L376 174L570 288H70Z" fill="#9CC1F6"/>
-  <path d="M70 288L204 142L256 194L172 288H70Z" fill="#6EA2EA"/>
-  <path d="M338 288L432 206L570 288H338Z" fill="#4D82DF"/>
-  <path d="M0 288H640V360H0V288Z" fill="#DCEAFF"/>
-  <text x="320" y="328" text-anchor="middle" fill="#356AC7" font-family="Arial, sans-serif" font-size="24" font-weight="700">LocalHub</text>
+  <rect width="640" height="360" rx="24" fill="#F1F1F1"/>
+  <circle cx="500" cy="92" r="38" fill="#D0D0D0"/>
+  <path d="M70 288L204 142L302 240L376 174L570 288H70Z" fill="#B8B8B8"/>
+  <path d="M70 288L204 142L256 194L172 288H70Z" fill="#8E8E8E"/>
+  <path d="M338 288L432 206L570 288H338Z" fill="#4A4A4A"/>
+  <path d="M0 288H640V360H0V288Z" fill="#DDDDDD"/>
+  <text x="320" y="328" text-anchor="middle" fill="#202020" font-family="Arial, sans-serif" font-size="24" font-weight="700">호남두</text>
 </svg>

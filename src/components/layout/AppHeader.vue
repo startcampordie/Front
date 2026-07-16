@@ -3,7 +3,7 @@ import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SEARCH_TYPES } from '@/config/search'
 import { toSearchRouteQuery } from '@/services/searchService'
-import Logo from '@/assets/logo.png'
+import honamDooLogo from '@/assets/honamdoo-logo.png'
 
 const route = useRoute()
 const router = useRouter()
@@ -44,7 +44,12 @@ async function submitSearch() {
 
   await router.push({
     name: 'home',
-    query: toSearchRouteQuery({ keyword: trimmedKeyword, type: type.value, region: 'all' }),
+    query: toSearchRouteQuery({
+      keyword: trimmedKeyword,
+      type: type.value,
+      province: 'all',
+      district: 'all',
+    }),
     hash: '#search',
   })
   closeSearch()
@@ -62,7 +67,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
   <header class="site-header">
     <div class="header-bar container">
       <RouterLink class="brand" to="/" aria-label="호남두 홈">
-        <img :src="Logo" alt="호남두" class="brand-logo" />
+        <img class="brand-logo" :src="honamDooLogo" alt="호남두" />
       </RouterLink>
 
       <nav class="main-nav" aria-label="주요 메뉴">
@@ -75,21 +80,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
           {{ item.label }}
         </RouterLink>
       </nav>
-
-      <button
-        class="search-toggle"
-        type="button"
-        :aria-expanded="isSearchOpen"
-        aria-controls="global-search"
-        :aria-label="isSearchOpen ? '검색창 닫기' : '검색창 열기'"
-        @click="toggleSearch"
-      >
-        <span v-if="isSearchOpen" aria-hidden="true">×</span>
-        <svg v-else viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="11" cy="11" r="6.5" />
-          <path d="m16 16 4 4" />
-        </svg>
-      </button>
     </div>
 
     <Transition name="search-panel">
@@ -123,26 +113,3 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
     </Transition>
   </header>
 </template>
-
-<style scoped>
-.brand {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-}
-
-.brand-logo {
-  display: block;
-  width: clamp(7.5rem, 12vw, 10rem);
-  height: 3rem;
-  object-fit: contain;
-  object-position: left center;
-}
-
-@media (max-width: 640px) {
-  .brand-logo {
-    width: 6.5rem;
-    height: 2.5rem;
-  }
-}
-</style>

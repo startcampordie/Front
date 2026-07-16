@@ -3,14 +3,39 @@ import places from '@/data/mock/places.json'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true' || !API_BASE_URL
 
+const CATEGORY_LABELS = {
+  ATTRACTION: '관광지',
+  CULTURE: '문화시설',
+  RESTAURANT: '음식점',
+  FESTIVAL: '축제·행사',
+}
+
+function mapPlace(place) {
+  return {
+    id: place.id,
+    category: place.category.toLowerCase(),
+    categoryLabel: CATEGORY_LABELS[place.category] ?? place.category,
+    name: place.title,
+    address: place.address ?? '주소 정보 없음',
+    imageUrl: place.image_url ?? '',
+    tags: Array.isArray(place.tags) ? place.tags : [],
+  }
+}
+
 export async function getPlaces({ category = 'all', tags = [], keyword = '', page = 1, pageSize = 6 } = {}) {
   if (!USE_MOCK) {
-    // BACKEND 연결 지점: 배열 태그 직렬화 방식(tags=사진,자연 또는 tags=사진&tags=자연)을 API 명세에 맞춥니다.
-    const query = new URLSearchParams({ category, keyword, page, size: pageSize })
+    const query = new URLSearchParams({ category, page, size: pageSize })
+    if (keyword.trim()) query.set('keyword', keyword.trim())
     tags.forEach((tag) => query.append('tags', tag))
-    const response = await fetch(`${API_BASE_URL}/places?${query}`)
+    const response = await fetch(`${API_BASE_URL}/contents?${query}`)
     if (!response.ok) throw new Error('지역 정보를 불러오지 못했습니다.')
-    return response.json()
+    const payload = await response.json()
+    return {
+      items: payload.items.map(mapPlace),
+      totalCount: payload.total_elements,
+      totalPages: payload.total_pages,
+      page: payload.page,
+    }
   }
 
   let filtered = places.filter((place) => {
