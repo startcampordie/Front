@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { POPULAR_KEYWORDS, REGIONS, SEARCH_TYPES } from '@/config/search'
+import { POPULAR_KEYWORDS, SEARCH_TYPES } from '@/config/search'
 import { searchAll, toSearchRouteQuery } from '@/services/searchService'
 
 const route = useRoute()
@@ -11,7 +11,41 @@ const searchError = ref('')
 const hasSearched = ref(false)
 const searchResult = ref(null)
 
-const filters = reactive({ type: 'all', keyword: '', region: 'all' })
+const filters = reactive({ type: 'all', keyword: '', province: 'all', region: 'all' })
+
+const PROVINCES = [
+  { value: 'all', label: '전체' },
+  { value: '전북', label: '전북' },
+  { value: '전남', label: '전남' },
+]
+
+const REGIONS_BY_PROVINCE = {
+  all: [{ value: 'all', label: '전체 지역' }],
+  전북: [
+    { value: 'all', label: '전북 전체' },
+    { value: '전주시', label: '전주시' }, { value: '군산시', label: '군산시' },
+    { value: '익산시', label: '익산시' }, { value: '정읍시', label: '정읍시' },
+    { value: '남원시', label: '남원시' }, { value: '김제시', label: '김제시' },
+    { value: '완주군', label: '완주군' }, { value: '진안군', label: '진안군' },
+    { value: '무주군', label: '무주군' }, { value: '장수군', label: '장수군' },
+    { value: '임실군', label: '임실군' }, { value: '순창군', label: '순창군' },
+    { value: '고창군', label: '고창군' }, { value: '부안군', label: '부안군' },
+  ],
+  전남: [
+    { value: 'all', label: '전남 전체' },
+    { value: '목포시', label: '목포시' }, { value: '여수시', label: '여수시' },
+    { value: '순천시', label: '순천시' }, { value: '나주시', label: '나주시' },
+    { value: '광양시', label: '광양시' }, { value: '담양군', label: '담양군' },
+    { value: '곡성군', label: '곡성군' }, { value: '구례군', label: '구례군' },
+    { value: '고흥군', label: '고흥군' }, { value: '보성군', label: '보성군' },
+    { value: '화순군', label: '화순군' }, { value: '장흥군', label: '장흥군' },
+    { value: '강진군', label: '강진군' }, { value: '해남군', label: '해남군' },
+    { value: '영암군', label: '영암군' }, { value: '무안군', label: '무안군' },
+    { value: '함평군', label: '함평군' }, { value: '영광군', label: '영광군' },
+    { value: '장성군', label: '장성군' }, { value: '완도군', label: '완도군' },
+    { value: '진도군', label: '진도군' }, { value: '신안군', label: '신안군' },
+  ],
+}
 
 const categoryCards = [
   { category: '관광지', name: '무등산 국립공원', address: '광주 북구 무등산로', type: 'attraction' },
@@ -38,7 +72,21 @@ function applyRouteQuery() {
   filters.type = typeof route.query.type === 'string' ? route.query.type : 'all'
   filters.keyword = typeof route.query.keyword === 'string' ? route.query.keyword : ''
   filters.region = typeof route.query.region === 'string' ? route.query.region : 'all'
+
+  if (filters.region === '전북') {
+    filters.province = '전북'; filters.region = 'all'
+  } else if (filters.region === '전남') {
+    filters.province = '전남'; filters.region = 'all'
+  } else if (filters.region !== 'all' && REGIONS_BY_PROVINCE.전북.some((region) => region.value === filters.region)) {
+    filters.province = '전북'
+  } else if (filters.region !== 'all' && REGIONS_BY_PROVINCE.전남.some((region) => region.value === filters.region)) {
+    filters.province = '전남'
+  } else {
+    filters.province = 'all'
+  }
 }
+
+function changeProvince() { filters.region = 'all' }
 
 async function runSearch() {
   isLoading.value = true
@@ -46,7 +94,10 @@ async function runSearch() {
   hasSearched.value = true
 
   try {
-    searchResult.value = await searchAll(filters)
+    searchResult.value = await searchAll({
+      ...filters,
+      region: filters.region === 'all' && filters.province !== 'all' ? filters.province : filters.region,
+    })
   } catch (error) {
     searchError.value = error instanceof Error ? error.message : '검색 중 오류가 발생했습니다.'
   } finally {
@@ -57,7 +108,10 @@ async function runSearch() {
 async function submitSearch() {
   if (!filters.keyword.trim()) return
 
-  const nextQuery = toSearchRouteQuery(filters)
+  const nextQuery = toSearchRouteQuery({
+    ...filters,
+    region: filters.region === 'all' && filters.province !== 'all' ? filters.province : filters.region,
+  })
   const currentQuery = toSearchRouteQuery({
     type: route.query.type,
     keyword: route.query.keyword,
@@ -95,7 +149,7 @@ watch(
 
       <form class="home-search" role="search" @submit.prevent="submitSearch">
         <label class="sr-only" for="home-search-type">검색 대상</label>
-        <select id="home-search-type" v-model="filters.type">
+        <select id="home-search-type" v-model="filters.type" class="search-type-select">
           <option v-for="option in SEARCH_TYPES" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
@@ -104,17 +158,24 @@ watch(
         <input
           id="home-search-keyword"
           v-model="filters.keyword"
+          class="search-keyword-input"
           type="search"
           placeholder="관광지, 맛집, 축제, 게시글 검색"
         />
-        <label class="sr-only" for="home-search-region">지역</label>
-        <select id="home-search-region" v-model="filters.region">
-          <option v-for="region in REGIONS" :key="region.value" :value="region.value">
+        <label class="sr-only" for="home-search-province">도 선택</label>
+        <select id="home-search-province" v-model="filters.province" class="province-select" @change="changeProvince">
+          <option v-for="province in PROVINCES" :key="province.value" :value="province.value">
+            {{ province.label }}
+          </option>
+        </select>
+        <label class="sr-only" for="home-search-region">시·군 선택</label>
+        <select id="home-search-region" v-model="filters.region" class="region-select" :disabled="filters.province === 'all'">
+          <option v-for="region in REGIONS_BY_PROVINCE[filters.province]" :key="region.value" :value="region.value">
             {{ region.label }}
           </option>
         </select>
-        <button class="button button-dark" type="submit">검색</button>
-        <RouterLink class="button button-primary" to="/board">게시판</RouterLink>
+        <button class="button button-dark search-submit" type="submit">검색</button>
+        <RouterLink class="button button-primary board-link" to="/board">게시판</RouterLink>
       </form>
 
       <div class="popular-keywords" aria-label="인기 검색어">
@@ -183,3 +244,70 @@ watch(
     </section>
   </div>
 </template>
+
+<style scoped>
+.home-search {
+  display: grid;
+  grid-template-columns: 8rem minmax(13rem, 1fr) 6.5rem 9.5rem auto auto;
+  align-items: stretch;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.home-search select,
+.home-search input,
+.home-search .button {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 3rem;
+}
+
+.search-keyword-input {
+  width: 100%;
+}
+
+.region-select {
+  width: 100%;
+  min-width: 9.5rem;
+}
+
+.search-submit,
+.board-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 1rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .home-search {
+    grid-template-columns: 8rem minmax(0, 1fr) 4.5rem 5rem;
+    grid-template-areas:
+      "type keyword search board"
+      "province region region region";
+  }
+
+  .search-type-select { grid-area: type; }
+  .search-keyword-input { grid-area: keyword; }
+  .province-select { grid-area: province; }
+  .region-select { grid-area: region; }
+  .search-submit { grid-area: search; }
+  .board-link { grid-area: board; }
+}
+
+@media (max-width: 640px) {
+  .home-search {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "type province"
+      "region region"
+      "keyword keyword"
+      "search board";
+  }
+
+  .region-select {
+    min-width: 0;
+  }
+}
+</style>

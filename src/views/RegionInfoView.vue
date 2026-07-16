@@ -76,7 +76,7 @@ onMounted(() => { applyQuery(); loadPlaces() })
       <span>선택된 카테고리: {{ selectedCategoryLabel }}<template v-if="filters.selectedTags.length"> · 선택 태그: {{ filters.selectedTags.join(', ') }}</template></span>
       <span>검색 결과 {{ result.totalCount }}건</span>
     </div>
-    <form class="region-search" @submit.prevent="search"><input v-model="keywordInput" placeholder="장소 이름 또는 주소 검색" /><button class="button button-dark">검색</button><button class="button" type="button" @click="resetFilters">초기화</button></form>
+    <form class="region-search" @submit.prevent="search"><input v-model="keywordInput" placeholder="장소 이름 또는 주소 검색" /><button class="button button-dark">검색</button><button class="button reset-button" type="button" @click="resetFilters">초기화</button></form>
 
     <p v-if="error" class="form-error">{{ error }}</p>
     <div v-if="loading" class="empty-state">지역 정보를 불러오는 중입니다…</div>
@@ -95,3 +95,11 @@ onMounted(() => { applyQuery(); loadPlaces() })
     </nav>
   </div>
 </template>
+
+<style scoped>
+.reset-button {
+  min-width: 4.5rem;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+</style>
