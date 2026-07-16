@@ -8,8 +8,7 @@ const router = useRouter()
 const categories = [
   { value: 'all', label: '전체' }, { value: 'attraction', label: '관광지' },
   { value: 'culture', label: '문화시설' }, { value: 'restaurant', label: '음식점' },
-  { value: 'festival', label: '축제·행사' }, { value: 'leisure', label: '레포츠' },
-  { value: 'lodging', label: '숙박' }, { value: 'shopping', label: '쇼핑' },
+  { value: 'festival', label: '축제·행사' },
 ]
 const tags = ['조용한', '연인', '아이', '가족', '친구', '혼자', '사진', '자연', '체험', '활기찬']
 const filters = reactive({ category: 'all', selectedTags: [], keyword: '' })
@@ -53,7 +52,9 @@ function updateRoute(page = 1) {
 
 function selectCategory(category) { filters.category = category; updateRoute(1) }
 function toggleTag(tag) {
-  filters.selectedTags = filters.selectedTags.includes(tag) ? filters.selectedTags.filter((item) => item !== tag) : [...filters.selectedTags, tag]
+  filters.selectedTags = filters.selectedTags.includes(tag)
+    ? filters.selectedTags.filter((item) => item !== tag)
+    : [...filters.selectedTags, tag]
   updateRoute(1)
 }
 function search() { filters.keyword = keywordInput.value.trim(); updateRoute(1) }
@@ -66,11 +67,12 @@ onMounted(() => { applyQuery(); loadPlaces() })
 <template>
   <div class="container page-section">
     <p class="breadcrumb">홈 &gt; 지역 정보</p>
-    <h1>광주 지역 정보</h1>
-    <p class="page-description">제공된 JSON 데이터를 카테고리와 태그별로 찾아보세요.</p>
+    <h1>호남 지역 정보</h1>
+    <p class="page-description">전북·전남의 지역 정보를 카테고리와 태그별로 찾아보세요.</p>
 
     <div class="filter-row"><strong>카테고리</strong><button v-for="item in categories" :key="item.value" :class="{ selected: filters.category === item.value }" @click="selectCategory(item.value)">{{ item.label }}</button></div>
     <div class="filter-row"><strong>태그 필터</strong><button v-for="tag in tags" :key="tag" :class="{ selected: filters.selectedTags.includes(tag) }" @click="toggleTag(tag)">{{ tag }}</button><button v-if="filters.selectedTags.length" @click="filters.selectedTags = []; updateRoute(1)">전체 해제</button></div>
+    <p class="filter-help">선택한 태그 중 하나 이상과 일치하는 지역정보를 표시합니다.</p>
 
     <div class="selection-summary">
       <span>선택된 카테고리: {{ selectedCategoryLabel }}<template v-if="filters.selectedTags.length"> · 선택 태그: {{ filters.selectedTags.join(', ') }}</template></span>
@@ -95,11 +97,3 @@ onMounted(() => { applyQuery(); loadPlaces() })
     </nav>
   </div>
 </template>
-
-<style scoped>
-.reset-button {
-  min-width: 4.5rem;
-  white-space: nowrap;
-  word-break: keep-all;
-}
-</style>

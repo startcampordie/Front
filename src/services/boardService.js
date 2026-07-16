@@ -31,7 +31,17 @@ async function apiRequest(path, options = {}) {
   })
 
   if (!response.ok) {
-    const error = new Error('게시판 요청을 처리하지 못했습니다.')
+    let message = '게시판 요청을 처리하지 못했습니다.'
+    try {
+      const payload = await response.json()
+      if (typeof payload?.detail === 'string') message = payload.detail
+      else if (Array.isArray(payload?.detail)) {
+        message = payload.detail.map((item) => item.msg).filter(Boolean).join(' ')
+      }
+    } catch {
+      // JSON 오류 본문이 아니면 기본 메시지를 사용합니다.
+    }
+    const error = new Error(message)
     error.status = response.status
     throw error
   }
@@ -39,11 +49,34 @@ async function apiRequest(path, options = {}) {
   return response.status === 204 ? null : response.json()
 }
 
+function mapPost(post) {
+  return {
+    id: post.id,
+    title: post.title,
+    content: post.content,
+    author: '익명',
+    views: post.view_count,
+    createdAt: post.created_at,
+    updatedAt: post.updated_at,
+  }
+}
+
 export async function getPosts({ keyword = '', searchType = 'title-content', sort = 'latest', page = 1, pageSize = 10 } = {}) {
   if (!USE_MOCK) {
-    // BACKEND 연결 지점: API 명세의 검색/정렬/페이징 파라미터 이름이 다르면 이 부분만 변경합니다.
-    const query = new URLSearchParams({ keyword, searchType, sort, page, size: pageSize })
-    return apiRequest(`/posts?${query}`)
+    const query = new URLSearchParams({
+      search_type: searchType === 'title-content' ? 'title_content' : searchType,
+      sort,
+      page,
+      size: pageSize,
+    })
+    if (keyword.trim()) query.set('keyword', keyword.trim())
+    const payload = await apiRequest(`/posts?${query}`)
+    return {
+      items: payload.items.map(mapPost),
+      totalCount: payload.total,
+      totalPages: payload.total_pages,
+      page: payload.page,
+    }
   }
 
   await wait()
@@ -73,8 +106,7 @@ export async function getPosts({ keyword = '', searchType = 'title-content', sor
 
 export async function getPost(id, { increaseView = true } = {}) {
   if (!USE_MOCK) {
-    // BACKEND 연결 지점: 조회수 증가는 서버에서 원자적으로 처리해야 합니다.
-    return apiRequest(`/posts/${id}${increaseView ? '?increaseView=true' : ''}`)
+    return mapPost(await apiRequest(`/posts/${id}`))
   }
 
   await wait()
@@ -90,8 +122,7 @@ export async function getPost(id, { increaseView = true } = {}) {
 
 export async function createPost(input) {
   if (!USE_MOCK) {
-    // BACKEND 연결 지점: 작성자 정책과 비밀번호 전달 형식은 API 명세에 맞춰 변경합니다.
-    return apiRequest('/posts', { method: 'POST', body: JSON.stringify(input) })
+    return mapPost(await apiRequest('/posts', { method: 'POST', body: JSON.stringify(input) }))
   }
 
   await wait()
@@ -126,8 +157,7 @@ export async function verifyPostPassword(id, password) {
 
 export async function updatePost(id, input) {
   if (!USE_MOCK) {
-    // BACKEND 연결 지점: 인증 토큰 방식이면 password 대신 Authorization 헤더를 사용합니다.
-    return apiRequest(`/posts/${id}`, { method: 'PUT', body: JSON.stringify(input) })
+    return mapPost(await apiRequest(`/posts/${id}`, { method: 'PUT', body: JSON.stringify(input) }))
   }
 
   const verification = await verifyPostPassword(id, input.password)

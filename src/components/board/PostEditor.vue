@@ -26,7 +26,7 @@ watch(
 function validate() {
   validationError.title = form.title.trim() ? '' : '제목을 입력해 주세요.'
   validationError.content = form.content.trim() ? '' : '내용을 입력해 주세요.'
-  validationError.password = form.password ? '' : '수정·삭제용 비밀번호를 입력해 주세요.'
+  validationError.password = form.password.length >= 4 ? '' : '비밀번호를 4자 이상 입력해 주세요.'
   return !Object.values(validationError).some(Boolean)
 }
 
@@ -48,10 +48,10 @@ function submit() {
     <div class="password-field">
       <div>
         <label for="post-password">수정용 비밀번호</label>
-        <input id="post-password" v-model="form.password" type="password" maxlength="30" autocomplete="new-password" placeholder="비밀번호 입력" />
+        <input id="post-password" v-model="form.password" type="password" minlength="4" maxlength="100" autocomplete="new-password" placeholder="비밀번호 4자 이상" />
         <p v-if="validationError.password" class="field-error">{{ validationError.password }}</p>
       </div>
-      <p>이 게시글을 수정하거나 삭제할 때 사용됩니다. 실제 서버에서는 암호화해 저장합니다.</p>
+      <p>이 게시글을 수정하거나 삭제할 때 사용됩니다. 비밀번호를 잊지 않도록 주의해 주세요.</p>
     </div>
 
     <p v-if="error" class="form-error" role="alert">{{ error }}</p>
